@@ -163,8 +163,8 @@ public class ShootActivity extends BaseActivity implements SurfaceHolder.Callbac
 
         if (settings.mf) {
             try {
-                if (cameraEx.isSupportedToggleFocusMode()) {
-                    cameraEx.setToggleFocusMode(true);
+                if (isToggleFocusSupported(cameraEx)) {
+                    setToggleFocus(cameraEx, true);
                     usedToggleFocus = true;
                     focusStateSaved = true;
                 } else {
@@ -274,8 +274,8 @@ public class ShootActivity extends BaseActivity implements SurfaceHolder.Callbac
 
         if (focusStateSaved && settings.mf) {
             try {
-                if (usedToggleFocus && cameraEx.isSupportedToggleFocusMode()) {
-                    cameraEx.setToggleFocusMode(false);
+                if (usedToggleFocus && isToggleFocusSupported(cameraEx)) {
+                    setToggleFocus(cameraEx, false);
                 } else if (savedFocusMode != null) {
                     Camera.Parameters params = cameraEx.getNormalCamera().getParameters();
                     params.setFocusMode(savedFocusMode);
@@ -494,5 +494,23 @@ public class ShootActivity extends BaseActivity implements SurfaceHolder.Callbac
         else
             log("null");
         log("\n");
+    }
+
+    private static boolean isToggleFocusSupported(CameraEx cameraEx) {
+        try {
+            return (Boolean) cameraEx.getClass()
+                .getMethod("isSupportedToggleFocusMode")
+                .invoke(cameraEx);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private static void setToggleFocus(CameraEx cameraEx, boolean on) {
+        try {
+            cameraEx.getClass()
+                .getMethod("setToggleFocusMode", boolean.class)
+                .invoke(cameraEx, on);
+        } catch (Exception e) {}
     }
 }
