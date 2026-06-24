@@ -14,10 +14,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up JDK 8
+      - name: Set up JDK 11
         uses: actions/setup-java@v4
         with:
-          java-version: '8'
+          java-version: '11'
           distribution: 'temurin'
 
       - name: Set up Android SDK
@@ -25,8 +25,7 @@ jobs:
           ANDROID_SDK_ROOT="${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}"
           echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT" >> "$GITHUB_ENV"
           echo "ANDROID_HOME=$ANDROID_SDK_ROOT" >> "$GITHUB_ENV"
-          # Use the pre-installed sdkmanager (version 9.0, JDK 8 compatible)
-          # setup-android@v3 downloads v16.0 which requires JDK 17, so we avoid it
+          # Use pre-installed sdkmanager; setup-android@v3 downloads v16.0 (needs JDK 17)
           SDKMANAGER="${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager"
           if [ -f "$SDKMANAGER" ]; then
             yes | "$SDKMANAGER" "platforms;android-10"
