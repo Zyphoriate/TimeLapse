@@ -3,6 +3,15 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 10
 
+    signingConfigs {
+        release {
+            storeFile file(System.getenv('KEYSTORE_PATH') ?: '')
+            storePassword System.getenv('KEYSTORE_PASSWORD') ?: ''
+            keyAlias System.getenv('KEY_ALIAS') ?: ''
+            keyPassword System.getenv('KEY_PASSWORD') ?: ''
+        }
+    }
+
     defaultConfig {
         applicationId "com.jonasjuffinger.timelapse"
         minSdkVersion 10
@@ -14,6 +23,9 @@ android {
         release {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            if (System.getenv('KEYSTORE_PATH') != null) {
+                signingConfig signingConfigs.release
+            }
         }
     }
 
@@ -34,7 +46,8 @@ android.applicationVariants.all { variant ->
 }
 
 repositories {
-    jcenter()
+    mavenCentral()
+    google()
     maven { url "https://jitpack.io" }
 }
 

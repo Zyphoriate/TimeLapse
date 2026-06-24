@@ -45,6 +45,10 @@ public class ShootActivity extends BaseActivity implements SurfaceHolder.Callbac
 
     private Display display;
 
+    private String savedFocusMode;
+    private boolean usedToggleFocus;
+    private boolean focusStateSaved;
+
     static private final boolean SHOW_END_SCREEN = true;
 
     int getcnt(){
@@ -62,11 +66,13 @@ public class ShootActivity extends BaseActivity implements SurfaceHolder.Callbac
         {
             if(stopPicturePreview) {
                 stopPicturePreview = false;
-                camera.stopPreview();
-                reviewSurfaceView.setVisibility(View.GONE);
                 if(settings.displayOff)
                     display.off();
             }
+
+            try {
+                camera.startPreview();
+            } catch (Exception ignored) {}
 
             if(burstShooting) {
                 shoot();
@@ -150,19 +156,31 @@ public class ShootActivity extends BaseActivity implements SurfaceHolder.Callbac
         cameraEx.setShutterListener(this);
         cameraSurfaceHolder.addCallback(this);
         autoReviewControl = new CameraEx.AutoPictureReviewControl();
-        //autoReviewControl.setPictureReviewInfoHist(true);
+        autoReviewControl.setPictureReviewInfoHist(true);
         cameraEx.setAutoPictureReviewControl(autoReviewControl);
 
         final Camera.Parameters params = cameraEx.getNormalCamera().getParameters();
 
-        try {
-            if(settings.mf)
-                params.setFocusMode(CameraEx.ParametersModifier.FOCUS_MODE_MANUAL);
-            else
+        if (settings.mf) {
+            try {
+                if (cameraEx.isSupportedToggleFocusMode()) {
+                    cameraEx.setToggleFocusMode(true);
+                    usedToggleFocus = true;
+                    focusStateSaved = true;
+                } else {
+                    savedFocusMode = params.getFocusMode();
+                    params.setFocusMode(CameraEx.ParametersModifier.FOCUS_MODE_MANUAL);
+                    usedToggleFocus = false;
+                    focusStateSaved = true;
+                }
+            } catch (Exception e) {
+                focusStateSaved = false;
+            }
+        } else {
+            try {
                 params.setFocusMode("auto");
+            } catch (Exception ignored) {}
         }
-        catch(Exception ignored)
-        {}
 
 
         final CameraEx.ParametersModifier modifier = cameraEx.createParametersModifier(params);
@@ -253,6 +271,19 @@ public class ShootActivity extends BaseActivity implements SurfaceHolder.Callbac
         log("on pause");
 
         shootRunnableHandler.removeCallbacks(shootRunnable);
+
+        if (focusStateSaved && settings.mf) {
+            try {
+                if (usedToggleFocus && cameraEx.isSupportedToggleFocusMode()) {
+                    cameraEx.setToggleFocusMode(false);
+                } else if (savedFocusMode != null) {
+                    Camera.Parameters params = cameraEx.getNormalCamera().getParameters();
+                    params.setFocusMode(savedFocusMode);
+                    cameraEx.getNormalCamera().setParameters(params);
+                }
+            } catch (Exception e) {}
+            focusStateSaved = false;
+        }
 
         if(cameraSurfaceHolder == null)
             log("cameraSurfaceHolder == null");
@@ -377,6 +408,7 @@ public class ShootActivity extends BaseActivity implements SurfaceHolder.Callbac
 
                 // if the remaining time is negative immediately take the next picture
                 if (remainingTime < 0) {
+                    reviewSurfaceView.setVisibility(View.VISIBLE);
                     stopPicturePreview = false;
                     shootRunnableHandler.post(shootRunnable);
                 }
@@ -389,6 +421,7 @@ public class ShootActivity extends BaseActivity implements SurfaceHolder.Callbac
                     shootRunnableHandler.postDelayed(shootRunnable, previewPictureShowTime);
                 }
             } else {
+                reviewSurfaceView.setVisibility(View.VISIBLE);
                 stopPicturePreview = true;
                 shootRunnableHandler.postDelayed(shootRunnable, pictureReviewTime * 1000);
             }
