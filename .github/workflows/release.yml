@@ -34,9 +34,11 @@ jobs:
             find "${ANDROID_SDK_ROOT}" -name sdkmanager -type f 2>/dev/null
           fi
           ls -la "${ANDROID_SDK_ROOT}/platforms/" || true
-          # Old AGP expects annotations.jar in the deprecated tools/support path
+          # Old AGP expects annotations.jar in the deprecated tools/support path.
+          # Must be a valid jar (not an empty file) — JDK 11 javac parses it as ZIP.
           mkdir -p "${ANDROID_SDK_ROOT}/tools/support"
-          touch "${ANDROID_SDK_ROOT}/tools/support/annotations.jar"
+          echo "Manifest-Version: 1.0" > /tmp/manifest.txt
+          jar cfm "${ANDROID_SDK_ROOT}/tools/support/annotations.jar" /tmp/manifest.txt
 
       - name: Decode keystore
         if: env.KEYSTORE_BASE64 != ''
