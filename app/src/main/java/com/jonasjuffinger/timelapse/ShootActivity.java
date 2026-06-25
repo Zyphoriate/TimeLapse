@@ -66,9 +66,6 @@ public class ShootActivity extends BaseActivity implements SurfaceHolder.Callbac
         {
             if(stopPicturePreview) {
                 stopPicturePreview = false;
-                try {
-                    camera.startPreview();
-                } catch (Exception ignored) {}
                 if(settings.displayOff)
                     display.off();
             }
@@ -245,6 +242,7 @@ public class ShootActivity extends BaseActivity implements SurfaceHolder.Callbac
 
         if(settings.displayOff) {
             display.turnAutoOff(5000);
+            reviewSurfaceView.setVisibility(View.GONE);
         }
 
         setAutoPowerOffMode(false);
