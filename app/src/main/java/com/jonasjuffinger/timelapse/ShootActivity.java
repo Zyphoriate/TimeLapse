@@ -66,6 +66,7 @@ public class ShootActivity extends BaseActivity implements SurfaceHolder.Callbac
         {
             if(stopPicturePreview) {
                 stopPicturePreview = false;
+                camera.stopPreview();
                 if(settings.displayOff)
                     display.off();
             }
