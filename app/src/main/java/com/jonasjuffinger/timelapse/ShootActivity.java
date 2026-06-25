@@ -226,6 +226,18 @@ public class ShootActivity extends BaseActivity implements SurfaceHolder.Callbac
 
         cameraEx.getNormalCamera().setParameters(params);
 
+        try {
+            Camera.Size largest = null;
+            for (Camera.Size size : params.getSupportedPreviewSizes()) {
+                if (largest == null || size.width * size.height > largest.width * largest.height)
+                    largest = size;
+            }
+            if (largest != null) {
+                params.setPreviewSize(largest.width, largest.height);
+                cameraEx.getNormalCamera().setParameters(params);
+            }
+        } catch (Exception ignored) {}
+
         pictureReviewTime = 2; //autoReviewControl.getPictureReviewTime();
         //log(Integer.toString(pictureReviewTime));
 
@@ -391,7 +403,7 @@ public class ShootActivity extends BaseActivity implements SurfaceHolder.Callbac
         else {
             this.cameraEx.cancelTakePicture();
 
-            //camera.startPreview();
+            camera.startPreview();
 
             if (shotCount < settings.shotCount * getcnt()) {
 
