@@ -402,7 +402,7 @@ public class ShootActivity extends BaseActivity implements SurfaceHolder.Callbac
         else {
             this.cameraEx.cancelTakePicture();
 
-            startPreviewWithMaxSize();
+            camera.startPreview();
 
             if (shotCount < settings.shotCount * getcnt()) {
 
@@ -523,21 +523,5 @@ public class ShootActivity extends BaseActivity implements SurfaceHolder.Callbac
                 .getMethod("setToggleFocusMode", boolean.class)
                 .invoke(cameraEx, on);
         } catch (Exception e) {}
-    }
-
-    private void startPreviewWithMaxSize() {
-        try {
-            Camera.Parameters p = cameraEx.getNormalCamera().getParameters();
-            Camera.Size largest = null;
-            for (Camera.Size s : p.getSupportedPreviewSizes()) {
-                if (largest == null || s.width * s.height > largest.width * largest.height)
-                    largest = s;
-            }
-            if (largest != null) {
-                p.setPreviewSize(largest.width, largest.height);
-                cameraEx.getNormalCamera().setParameters(p);
-            }
-        } catch (Exception ignored) {}
-        camera.startPreview();
     }
 }

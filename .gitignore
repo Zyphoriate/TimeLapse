@@ -4,3 +4,5 @@
 /local.properties
 /*.iml
 /keystore.jks
+/release.keystore
+/release.keystore.b64
