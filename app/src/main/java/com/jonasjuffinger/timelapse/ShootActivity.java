@@ -66,13 +66,12 @@ public class ShootActivity extends BaseActivity implements SurfaceHolder.Callbac
         {
             if(stopPicturePreview) {
                 stopPicturePreview = false;
+                try {
+                    camera.startPreview();
+                } catch (Exception ignored) {}
                 if(settings.displayOff)
                     display.off();
             }
-
-            try {
-                camera.startPreview();
-            } catch (Exception ignored) {}
 
             if(burstShooting) {
                 shoot();
@@ -408,7 +407,8 @@ public class ShootActivity extends BaseActivity implements SurfaceHolder.Callbac
 
                 // if the remaining time is negative immediately take the next picture
                 if (remainingTime < 0) {
-                    reviewSurfaceView.setVisibility(View.VISIBLE);
+                    if (!settings.displayOff)
+                        reviewSurfaceView.setVisibility(View.VISIBLE);
                     stopPicturePreview = false;
                     shootRunnableHandler.post(shootRunnable);
                 }
@@ -416,12 +416,14 @@ public class ShootActivity extends BaseActivity implements SurfaceHolder.Callbac
                 else {
                     long previewPictureShowTime = Math.round(Math.min(remainingTime, pictureReviewTime * 1000));
                     log("  Stop preview in: " + previewPictureShowTime);
-                    reviewSurfaceView.setVisibility(View.VISIBLE);
+                    if (!settings.displayOff)
+                        reviewSurfaceView.setVisibility(View.VISIBLE);
                     stopPicturePreview = true;
                     shootRunnableHandler.postDelayed(shootRunnable, previewPictureShowTime);
                 }
             } else {
-                reviewSurfaceView.setVisibility(View.VISIBLE);
+                if (!settings.displayOff)
+                    reviewSurfaceView.setVisibility(View.VISIBLE);
                 stopPicturePreview = true;
                 shootRunnableHandler.postDelayed(shootRunnable, pictureReviewTime * 1000);
             }
